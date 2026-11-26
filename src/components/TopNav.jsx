@@ -1,5 +1,5 @@
 const NAV = [
-  ['dash', 'ภาพรวม'], ['jobs', 'รายการงาน'], ['machines', 'เครื่องจักร'],
+  ['dash', 'ภาพรวม'], ['monitor', 'Monitor'], ['jobs', 'รายการงาน'], ['machines', 'เครื่องจักร'],
   ['depts', 'แผนก / คอขวด'], ['attn', 'ต้องติดตาม'], ['hist', 'ย้อนหลัง'],
 ];
 const round = 'h-10 px-4 rounded-full bg-white/80 dark:bg-slate-800/80 text-sm hover:bg-white dark:hover:bg-slate-700';
