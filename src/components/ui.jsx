@@ -19,7 +19,7 @@ export function ChartBox({ type, data, options, dark, height }) {
 }
 
 export const Card = ({ className = '', children, ...rest }) => (
-  <div {...rest} className={`min-w-0 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm ${className}`}>{children}</div>
+   <div {...rest} className={`min-w-0 bg-white/75 dark:bg-slate-800/80 backdrop-blur rounded-xl border border-white dark:border-slate-700 shadow-sm ${className}`}>{children}</div>
 );
 
 // ไอคอน SVG ในตัว ไม่ต้องติดตั้งไลบรารีเพิ่ม

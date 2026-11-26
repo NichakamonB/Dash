@@ -5,7 +5,7 @@ import { STATUS } from '../data';
 const pct = (n, total) => (total ? `${Math.round((n / total) * 100)}%` : '0%');
 const MAX_SHOWN = 3;
 
-function OverdueModal({ list, onClose }) {
+export function OverdueModal({ list, onClose }) {
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', onKey);

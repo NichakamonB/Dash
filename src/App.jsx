@@ -1,26 +1,32 @@
 import { useMemo, useState } from 'react';
 import { API_URL } from './config';
 import { useJobs, useDark } from './hooks';
-import { computeMetrics, followList } from './data';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import KpiRow from './components/KpiRow';
+import { computeMetrics, followList, fmt } from './data';
+import TopNav from './components/TopNav';
+import Overview from './components/Overview';
 import StatusCard from './components/StatusCard';
 import Bottlenecks from './components/Bottlenecks';
-import StatusDonut from './components/StatusDonut';
-import QueueBars from './components/QueueBars';
-import LoadPie from './components/LoadPie';
 import Workload from './components/Workload';
 import JobsTable from './components/JobsTable';
 import History from './components/History';
 import { FollowUp, Alerts } from './components/FollowUp';
 
+function downloadCsv(rows) {
+  const cols = ['JobNo', 'Department', 'Responsible', 'Qty', 'DueDate', 'Status'];
+  // กันค่าที่ขึ้นต้นด้วย = + - @ ถูก Excel ตีความเป็นสูตร
+  const cell = v => `"${String(v).replace(/^[=+\-@](?=.)/, "'$&").replace(/"/g, '""')}"`;
+  const csv = [cols, ...rows.map(r => cols.map(c => r[c]))].map(r => r.map(cell).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `jobs-${fmt(new Date())}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 export default function App() {
   const { jobs, updated, error, loading, reload } = useJobs();
   const [dark, setDark] = useDark();
   const [view, setView] = useState('dash');
-  const [open, setOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
 
   const m = useMemo(() => {
     const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -30,20 +36,23 @@ export default function App() {
   const list = followList(m);
 
   return (
-    <div className={`min-h-screen transition-all duration-200 ${collapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
-      <Sidebar
-        view={view} setView={setView}
-        open={open} setOpen={setOpen}
-        collapsed={collapsed} onToggle={() => setCollapsed(c => !c)}
-        badge={list.length}
-      />
-      <Header
-        error={error} updated={updated} reload={reload}
-        dark={dark} setDark={setDark}
-        onMenu={() => setOpen(true)}
-        alerts={list.length} onBell={() => setView('attn')}
-      />
-      <main className="max-w-[1600px] mx-auto px-4 py-6 space-y-6">
+    <div className="min-h-screen">
+      <main className="max-w-[1400px] mx-auto px-4 py-5 space-y-4">
+        <TopNav
+          view={view} setView={setView} badge={list.length}
+          error={error} updated={updated} reload={reload}
+          dark={dark} setDark={setDark}
+        />
+        <div className="flex flex-wrap items-end justify-between gap-3 pt-3">
+          <div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">MFG Track / Production</p>
+            <h1 className="text-2xl">ภาพรวมการผลิต</h1>
+          </div>
+          <button onClick={() => downloadCsv(m.data)} disabled={!m.data.length}
+            className="h-10 px-4 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm disabled:opacity-40">
+            ดาวน์โหลดรายงาน (CSV)
+          </button>
+        </div>
         {!API_URL && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-sm p-3">
             กำลังแสดงข้อมูลตัวอย่าง ใส่ URL ที่ src/config.js เพื่อดึงข้อมูลจริง
@@ -56,18 +65,7 @@ export default function App() {
         )}
         {loading && <p className="text-slate-500">กำลังโหลดข้อมูล…</p>}
 
-        {view === 'dash' && (
-          <>
-            <KpiRow m={m} />
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              <StatusDonut m={m} dark={dark} />
-              <QueueBars m={m} />
-              <LoadPie m={m} dark={dark} />
-            </div>
-            <Workload m={m} dark={dark} />
-            <JobsTable data={m.data} />
-          </>
-        )}
+        {view === 'dash' && !loading && <Overview m={m} onFollow={() => setView('attn')} />}
 
         {view === 'jobs' && <JobsTable data={m.data} />}
         {view === 'machines' && <Workload m={m} dark={dark} />}
