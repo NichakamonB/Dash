@@ -10,6 +10,7 @@ import Workload from './components/Workload';
 import JobsTable from './components/JobsTable';
 import History from './components/History';
 import { FollowUp, Alerts } from './components/FollowUp';
+import Monitor from './components/Monitor';
 
 function downloadCsv(rows) {
   const cols = ['JobNo', 'Department', 'Responsible', 'Qty', 'DueDate', 'Status'];
@@ -66,7 +67,7 @@ export default function App() {
         {loading && <p className="text-slate-500">กำลังโหลดข้อมูล…</p>}
 
         {view === 'dash' && !loading && <Overview m={m} onFollow={() => setView('attn')} />}
-
+        {view === 'monitor' && <Monitor data={m.data} updated={updated} error={error} />}
         {view === 'jobs' && <JobsTable data={m.data} />}
         {view === 'machines' && <Workload m={m} dark={dark} />}
 
